@@ -1,9 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
-
-
 
 class College(models.Model):
     name = models.CharField(max_length=200)
@@ -15,7 +13,6 @@ class College(models.Model):
     def __str__(self):
         return self.name
 
-
 class Department(models.Model):
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=10)
@@ -25,9 +22,8 @@ class Department(models.Model):
     def __str__(self):
         return f"{self.name} - {self.college.name}"
 
-
 class Faculty(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='faculties')
     employee_id = models.CharField(max_length=20, unique=True)
     qualification = models.CharField(max_length=100)
@@ -35,7 +31,6 @@ class Faculty(models.Model):
     
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.employee_id}"
-
 
 class Student(models.Model):
     YEAR_CHOICES = [
@@ -45,7 +40,7 @@ class Student(models.Model):
         ('4', 'Fourth Year')
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     registration_number = models.CharField(max_length=20, unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='students')
     year = models.CharField(max_length=1, choices=YEAR_CHOICES)
@@ -53,7 +48,6 @@ class Student(models.Model):
     
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.registration_number}"
-
 
 class Hostel(models.Model):
     HOSTEL_TYPES = [
@@ -69,7 +63,6 @@ class Hostel(models.Model):
     def __str__(self):
         return self.name
 
-
 class HostelRoom(models.Model):
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='rooms')
     room_number = models.CharField(max_length=10)
@@ -78,7 +71,6 @@ class HostelRoom(models.Model):
     
     def __str__(self):
         return f"{self.hostel.name} - Room {self.room_number}"
-
 
 class HostelAllocation(models.Model):
     student = models.OneToOneField(Student, on_delete=models.CASCADE)
@@ -89,7 +81,6 @@ class HostelAllocation(models.Model):
     def __str__(self):
         return f"{self.student.user.get_full_name()} - {self.room}"
 
-
 class Library(models.Model):
     name = models.CharField(max_length=100)
     librarian = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True)
@@ -97,7 +88,6 @@ class Library(models.Model):
     
     def __str__(self):
         return self.name
-
 
 class Book(models.Model):
     library = models.ForeignKey(Library, on_delete=models.CASCADE, related_name='books')
@@ -110,7 +100,6 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
-
 class BookIssue(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -122,10 +111,6 @@ class BookIssue(models.Model):
     
     def __str__(self):
         return f"{self.book.title} - {self.student.user.get_full_name()}"
-    
-
-
-
 
 class Course(models.Model):
     name = models.CharField(max_length=200)
@@ -138,7 +123,6 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.code} - {self.name}"
 
-
 class CourseEnrollment(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -148,7 +132,6 @@ class CourseEnrollment(models.Model):
     class Meta:
         unique_together = ['student', 'course', 'semester']
 
-
 class Attendance(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -157,7 +140,6 @@ class Attendance(models.Model):
     
     class Meta:
         unique_together = ['course', 'student', 'date']
-
 
 class Examination(models.Model):
     EXAM_TYPES = [
@@ -175,7 +157,6 @@ class Examination(models.Model):
     def __str__(self):
         return f"{self.course.code} - {self.exam_type}"
 
-
 class ExamResult(models.Model):
     examination = models.ForeignKey(Examination, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -183,7 +164,6 @@ class ExamResult(models.Model):
     
     class Meta:
         unique_together = ['examination', 'student']
-
 
 class Fee(models.Model):
     FEE_TYPES = [
@@ -202,7 +182,6 @@ class Fee(models.Model):
     
     def __str__(self):
         return f"{self.student.registration_number} - {self.fee_type}"
-
 
 class Event(models.Model):
     EVENT_TYPES = [
@@ -224,7 +203,6 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-
 class Notice(models.Model):
     NOTICE_TYPES = [
         ('GEN', 'General'),
@@ -242,11 +220,6 @@ class Notice(models.Model):
     
     def __str__(self):
         return self.title
-    
-
-# Add these imports at the top
-# from django.core.validators import MinValueValidator, MaxValueValidator
-# from decimal import Decimal
 
 class AcademicYear(models.Model):
     year = models.CharField(max_length=9)  # e.g., "2024-2025"
