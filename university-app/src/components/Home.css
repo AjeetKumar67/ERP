@@ -1,0 +1,36 @@
+.home {
+    text-align: center;
+    padding: 50px;
+}
+
+.home h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.home p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+.login-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    text-decoration: none;
+    font-size: 1em;
+    border-radius: 5px;
+}
+
+.login-button:hover {
+    background-color: #45a049;
+}
+
+.features {
+    margin-top: 40px;
+}
+
+.features .MuiCard-root {
+    text-align: left;
+}
