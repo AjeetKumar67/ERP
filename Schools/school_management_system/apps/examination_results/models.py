@@ -1,12 +1,12 @@
 from django.db import models
 from apps.student_management.models import Student
 from apps.teacher_management.models import Teacher
-from apps.class_section_management.models import Class
+from apps.class_section_management.models import ClassSection
 
 class Exam(models.Model):
     name = models.CharField(max_length=100)
     date = models.DateField()
-    class_assigned = models.ForeignKey(Class, on_delete=models.CASCADE)
+    class_assigned = models.ForeignKey(ClassSection, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

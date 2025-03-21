@@ -1,28 +1,33 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Notification, Message
-from django.views import View
+from .serializers import NotificationSerializer, MessageSerializer
 
-class NotificationListView(View):
+class NotificationListView(APIView):
     def get(self, request):
         notifications = Notification.objects.all()
-        return render(request, 'communication_system/notification_list.html', {'notifications': notifications})
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class MessageListView(View):
+class MessageListView(APIView):
     def get(self, request):
         messages = Message.objects.all()
-        return render(request, 'communication_system/message_list.html', {'messages': messages})
+        serializer = MessageSerializer(messages, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class SendMessageView(View):
+class SendMessageView(APIView):
     def post(self, request):
-        recipient = request.POST.get('recipient')
-        content = request.POST.get('content')
-        message = Message.objects.create(recipient=recipient, content=content)
-        return JsonResponse({'status': 'success', 'message_id': message.id})
+        serializer = MessageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'success', 'message_id': serializer.data['id']}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class NotificationCreateView(View):
+class NotificationCreateView(APIView):
     def post(self, request):
-        title = request.POST.get('title')
-        message = request.POST.get('message')
-        notification = Notification.objects.create(title=title, message=message)
-        return JsonResponse({'status': 'success', 'notification_id': notification.id})
+        serializer = NotificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'status': 'success', 'notification_id': serializer.data['id']}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,9 +1,9 @@
 from django.db import models
-from apps.class_section_management.models import Class, Section
+from apps.class_section_management.models import ClassSection, Section
 from apps.teacher_management.models import Teacher
 
 class Timetable(models.Model):
-    class_instance = models.ForeignKey(Class, on_delete=models.CASCADE)
+    class_instance = models.ForeignKey(ClassSection, on_delete=models.CASCADE)
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     subject = models.CharField(max_length=100)

@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 # Custom User Model
 class User(AbstractUser):
@@ -13,6 +13,16 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Student')
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    groups = models.ManyToManyField(
+        Group,
+        related_name='custom_user_groups',  # Add related_name
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='custom_user_permissions',  # Add related_name
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.username} ({self.role})"

@@ -1,54 +1,86 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from .models import BusRoute, DriverAssignment
-from django.views import View
+from .serializers import BusRouteSerializer, DriverAssignmentSerializer
 
-class BusRouteListView(View):
+
+class BusRouteListView(APIView):
     def get(self, request):
         routes = BusRoute.objects.all()
-        return render(request, 'transport_management/bus_route_list.html', {'routes': routes})
+        serializer = BusRouteSerializer(routes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class BusRouteDetailView(View):
+
+class BusRouteDetailView(APIView):
     def get(self, request, pk):
         route = get_object_or_404(BusRoute, pk=pk)
-        return render(request, 'transport_management/bus_route_detail.html', {'route': route})
+        serializer = BusRouteSerializer(route)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class DriverAssignmentListView(View):
+
+class DriverAssignmentListView(APIView):
     def get(self, request):
         assignments = DriverAssignment.objects.all()
-        return render(request, 'transport_management/driver_assignment_list.html', {'assignments': assignments})
+        serializer = DriverAssignmentSerializer(assignments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class DriverAssignmentDetailView(View):
+
+class DriverAssignmentDetailView(APIView):
     def get(self, request, pk):
         assignment = get_object_or_404(DriverAssignment, pk=pk)
-        return render(request, 'transport_management/driver_assignment_detail.html', {'assignment': assignment})
+        serializer = DriverAssignmentSerializer(assignment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class CreateBusRouteView(View):
+
+class CreateBusRouteView(APIView):
     def post(self, request):
-        # Logic to create a new bus route
-        pass
+        serializer = BusRouteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CreateDriverAssignmentView(View):
+
+class CreateDriverAssignmentView(APIView):
     def post(self, request):
-        # Logic to create a new driver assignment
-        pass
+        serializer = DriverAssignmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UpdateBusRouteView(View):
-    def post(self, request, pk):
-        # Logic to update an existing bus route
-        pass
 
-class UpdateDriverAssignmentView(View):
-    def post(self, request, pk):
-        # Logic to update an existing driver assignment
-        pass
+class UpdateBusRouteView(APIView):
+    def put(self, request, pk):
+        route = get_object_or_404(BusRoute, pk=pk)
+        serializer = BusRouteSerializer(route, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class DeleteBusRouteView(View):
-    def post(self, request, pk):
-        # Logic to delete a bus route
-        pass
 
-class DeleteDriverAssignmentView(View):
-    def post(self, request, pk):
-        # Logic to delete a driver assignment
-        pass
+class UpdateDriverAssignmentView(APIView):
+    def put(self, request, pk):
+        assignment = get_object_or_404(DriverAssignment, pk=pk)
+        serializer = DriverAssignmentSerializer(assignment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteBusRouteView(APIView):
+    def delete(self, request, pk):
+        route = get_object_or_404(BusRoute, pk=pk)
+        route.delete()
+        return Response({'message': 'Bus route deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class DeleteDriverAssignmentView(APIView):
+    def delete(self, request, pk):
+        assignment = get_object_or_404(DriverAssignment, pk=pk)
+        assignment.delete()
+        return Response({'message': 'Driver assignment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)

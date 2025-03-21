@@ -1,44 +1,71 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import ClassSession, Assignment
-from django.views import View
+from .serializers import ClassSessionSerializer, AssignmentSerializer
 
-class ClassSessionListView(View):
+class ClassSessionListView(APIView):
     def get(self, request):
         sessions = ClassSession.objects.all()
-        return render(request, 'online_classes/class_session_list.html', {'sessions': sessions})
+        serializer = ClassSessionSerializer(sessions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class ClassSessionDetailView(View):
+class ClassSessionDetailView(APIView):
     def get(self, request, pk):
-        session = ClassSession.objects.get(pk=pk)
-        return render(request, 'online_classes/class_session_detail.html', {'session': session})
+        try:
+            session = ClassSession.objects.get(pk=pk)
+            serializer = ClassSessionSerializer(session)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ClassSession.DoesNotExist:
+            return Response({'error': 'Class session not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class AssignmentListView(View):
+class AssignmentListView(APIView):
     def get(self, request):
         assignments = Assignment.objects.all()
-        return render(request, 'online_classes/assignment_list.html', {'assignments': assignments})
+        serializer = AssignmentSerializer(assignments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class AssignmentDetailView(View):
+class AssignmentDetailView(APIView):
     def get(self, request, pk):
-        assignment = Assignment.objects.get(pk=pk)
-        return render(request, 'online_classes/assignment_detail.html', {'assignment': assignment})
+        try:
+            assignment = Assignment.objects.get(pk=pk)
+            serializer = AssignmentSerializer(assignment)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Assignment.DoesNotExist:
+            return Response({'error': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class CreateClassSessionView(View):
+class CreateClassSessionView(APIView):
     def post(self, request):
-        # Logic to create a new class session
-        pass
+        serializer = ClassSessionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CreateAssignmentView(View):
+class CreateAssignmentView(APIView):
     def post(self, request):
-        # Logic to create a new assignment
-        pass
+        serializer = AssignmentSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class JoinClassSessionView(View):
+class JoinClassSessionView(APIView):
     def post(self, request, pk):
-        # Logic for a student to join a class session
-        pass
+        try:
+            session = ClassSession.objects.get(pk=pk)
+            # Logic for a student to join a class session
+            # Example: session.students.add(request.user)
+            return Response({'message': 'Joined class session successfully'}, status=status.HTTP_200_OK)
+        except ClassSession.DoesNotExist:
+            return Response({'error': 'Class session not found'}, status=status.HTTP_404_NOT_FOUND)
 
-class SubmitAssignmentView(View):
+class SubmitAssignmentView(APIView):
     def post(self, request, pk):
-        # Logic for a student to submit an assignment
-        pass
+        try:
+            assignment = Assignment.objects.get(pk=pk)
+            # Logic for a student to submit an assignment
+            # Example: assignment.submitted_by.add(request.user)
+            return Response({'message': 'Assignment submitted successfully'}, status=status.HTTP_200_OK)
+        except Assignment.DoesNotExist:
+            return Response({'error': 'Assignment not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -25,7 +25,11 @@ class Admission(models.Model):
         return f"Admission for {self.student.user.first_name} {self.student.user.last_name}"
 
 class Attendance(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='student_management_attendance'  # Add related_name
+    )
     date = models.DateField()
     status = models.CharField(max_length=10, choices=[('Present', 'Present'), ('Absent', 'Absent')])
 

@@ -4,7 +4,11 @@ from apps.student_management.models import Student
 from apps.teacher_management.models import Teacher
 
 class Attendance(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='attendance_records'  # Add related_name to resolve clashes
+    )
     date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=10, choices=[('Present', 'Present'), ('Absent', 'Absent'), ('Late', 'Late')])
     remarks = models.TextField(blank=True, null=True)

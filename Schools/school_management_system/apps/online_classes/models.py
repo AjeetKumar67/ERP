@@ -32,7 +32,11 @@ class OnlineClassMaterial(models.Model):
 
 class Attendance(models.Model):
     class_session = models.ForeignKey(ClassSession, on_delete=models.CASCADE)
-    student = models.ForeignKey('student_management.Student', on_delete=models.CASCADE)
+    student = models.ForeignKey(
+        'student_management.Student',
+        on_delete=models.CASCADE,
+        related_name='online_class_attendance'  # Add related_name
+    )
     date = models.DateField()
     status = models.BooleanField(default=False)  # True for present, False for absent
 

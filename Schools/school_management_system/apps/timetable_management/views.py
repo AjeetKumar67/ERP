@@ -1,83 +1,87 @@
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Timetable, Schedule
-from django.views import View
-from django.utils import timezone
+from .serializers import TimetableSerializer, ScheduleSerializer
 
-class TimetableView(View):
+class TimetableListView(APIView):
     def get(self, request):
         timetables = Timetable.objects.all()
-        return render(request, 'timetable_management/timetable_list.html', {'timetables': timetables})
-
-class TimetableDetailView(View):
-    def get(self, request, pk):
-        timetable = Timetable.objects.get(pk=pk)
-        return render(request, 'timetable_management/timetable_detail.html', {'timetable': timetable})
-
-class TimetableCreateView(View):
-    def get(self, request):
-        return render(request, 'timetable_management/timetable_form.html')
+        serializer = TimetableSerializer(timetables, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        timetable = Timetable()
-        timetable.name = request.POST['name']
-        timetable.created_at = timezone.now()
-        timetable.save()
-        return redirect('timetable_list')
+        serializer = TimetableSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class TimetableUpdateView(View):
+class TimetableDetailView(APIView):
     def get(self, request, pk):
-        timetable = Timetable.objects.get(pk=pk)
-        return render(request, 'timetable_management/timetable_form.html', {'timetable': timetable})
+        try:
+            timetable = Timetable.objects.get(pk=pk)
+        except Timetable.DoesNotExist:
+            return Response({'error': 'Timetable not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = TimetableSerializer(timetable)
+        return Response(serializer.data)
 
-    def post(self, request, pk):
-        timetable = Timetable.objects.get(pk=pk)
-        timetable.name = request.POST['name']
-        timetable.save()
-        return redirect('timetable_list')
+    def put(self, request, pk):
+        try:
+            timetable = Timetable.objects.get(pk=pk)
+        except Timetable.DoesNotExist:
+            return Response({'error': 'Timetable not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = TimetableSerializer(timetable, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class TimetableDeleteView(View):
-    def post(self, request, pk):
-        timetable = Timetable.objects.get(pk=pk)
+    def delete(self, request, pk):
+        try:
+            timetable = Timetable.objects.get(pk=pk)
+        except Timetable.DoesNotExist:
+            return Response({'error': 'Timetable not found'}, status=status.HTTP_404_NOT_FOUND)
         timetable.delete()
-        return redirect('timetable_list')
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-class ScheduleView(View):
+class ScheduleListView(APIView):
     def get(self, request):
         schedules = Schedule.objects.all()
-        return render(request, 'timetable_management/schedule_list.html', {'schedules': schedules})
-
-class ScheduleCreateView(View):
-    def get(self, request):
-        return render(request, 'timetable_management/schedule_form.html')
+        serializer = ScheduleSerializer(schedules, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        schedule = Schedule()
-        schedule.class_name = request.POST['class_name']
-        schedule.subject = request.POST['subject']
-        schedule.day = request.POST['day']
-        schedule.start_time = request.POST['start_time']
-        schedule.end_time = request.POST['end_time']
-        schedule.save()
-        return redirect('schedule_list')
+        serializer = ScheduleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ScheduleUpdateView(View):
+class ScheduleDetailView(APIView):
     def get(self, request, pk):
-        schedule = Schedule.objects.get(pk=pk)
-        return render(request, 'timetable_management/schedule_form.html', {'schedule': schedule})
+        try:
+            schedule = Schedule.objects.get(pk=pk)
+        except Schedule.DoesNotExist:
+            return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ScheduleSerializer(schedule)
+        return Response(serializer.data)
 
-    def post(self, request, pk):
-        schedule = Schedule.objects.get(pk=pk)
-        schedule.class_name = request.POST['class_name']
-        schedule.subject = request.POST['subject']
-        schedule.day = request.POST['day']
-        schedule.start_time = request.POST['start_time']
-        schedule.end_time = request.POST['end_time']
-        schedule.save()
-        return redirect('schedule_list')
+    def put(self, request, pk):
+        try:
+            schedule = Schedule.objects.get(pk=pk)
+        except Schedule.DoesNotExist:
+            return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ScheduleSerializer(schedule, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ScheduleDeleteView(View):
-    def post(self, request, pk):
-        schedule = Schedule.objects.get(pk=pk)
+    def delete(self, request, pk):
+        try:
+            schedule = Schedule.objects.get(pk=pk)
+        except Schedule.DoesNotExist:
+            return Response({'error': 'Schedule not found'}, status=status.HTTP_404_NOT_FOUND)
         schedule.delete()
-        return redirect('schedule_list')
+        return Response(status=status.HTTP_204_NO_CONTENT)

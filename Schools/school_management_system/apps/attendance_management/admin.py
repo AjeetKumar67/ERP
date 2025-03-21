@@ -9,6 +9,6 @@ class AttendanceAdmin(admin.ModelAdmin):
 
 @admin.register(Biometric)
 class BiometricAdmin(admin.ModelAdmin):
-    list_display = ('student', 'timestamp', 'action')
-    search_fields = ('student__name', 'action')
-    list_filter = ('action', 'timestamp')
+    list_display = ('student', 'timestamp', 'status')  # Replace 'action' with 'status'
+    search_fields = ('student__name', 'status')  # Replace 'action' with 'status'
+    list_filter = ('status', 'timestamp')  # Replace 'action' with 'status'

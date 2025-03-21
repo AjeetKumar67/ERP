@@ -1,23 +1,35 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.shortcuts import render
 from .models import PerformanceReport, FinancialReport
+from .serializers import PerformanceReportSerializer, FinancialReportSerializer
 
-def performance_report(request):
-    reports = PerformanceReport.objects.all()
-    return render(request, 'reports_analytics/performance_report.html', {'reports': reports})
+class PerformanceReportView(APIView):
+    def get(self, request):
+        reports = PerformanceReport.objects.all()
+        serializer = PerformanceReportSerializer(reports, many=True)
+        return render(request, 'reports_analytics/performance_report.html', {'reports': serializer.data})
 
-def financial_report(request):
-    reports = FinancialReport.objects.all()
-    return render(request, 'reports_analytics/financial_report.html', {'reports': reports})
+class FinancialReportView(APIView):
+    def get(self, request):
+        reports = FinancialReport.objects.all()
+        serializer = FinancialReportSerializer(reports, many=True)
+        return render(request, 'reports_analytics/financial_report.html', {'reports': serializer.data})
 
-def generate_performance_report(request, student_id):
-    report = PerformanceReport.objects.filter(student_id=student_id).first()
-    if report:
-        return JsonResponse({'status': 'success', 'data': report.to_dict()})
-    return JsonResponse({'status': 'error', 'message': 'Report not found'})
+class GeneratePerformanceReportView(APIView):
+    def get(self, request, student_id):
+        report = PerformanceReport.objects.filter(student_id=student_id).first()
+        if report:
+            serializer = PerformanceReportSerializer(report)
+            return Response({'status': 'success', 'data': serializer.data})
+        return Response({'status': 'error', 'message': 'Report not found'})
 
-def generate_financial_report(request, student_id):
-    report = FinancialReport.objects.filter(student_id=student_id).first()
-    if report:
-        return JsonResponse({'status': 'success', 'data': report.to_dict()})
-    return JsonResponse({'status': 'error', 'message': 'Report not found'})
+class GenerateFinancialReportView(APIView):
+    def get(self, request, student_id):
+        report = FinancialReport.objects.filter(student_id=student_id).first()
+        if report:
+            serializer = FinancialReportSerializer(report)
+            return Response({'status': 'success', 'data': serializer.data})
+        return Response({'status': 'error', 'message': 'Report not found'})

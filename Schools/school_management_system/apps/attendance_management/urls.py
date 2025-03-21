@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import AttendanceListView, MarkAttendanceView
+from .views import AttendanceView, AttendanceDetailView, BiometricView
 
 urlpatterns = [
-    path('', AttendanceListView.as_view(), name='attendance-list'),
-    path('mark/', MarkAttendanceView.as_view(), name='mark-attendance'),
+    path('api/attendance/', AttendanceView.as_view(), name='attendance-api'),
+    path('api/attendance/<int:student_id>/', AttendanceDetailView.as_view(), name='attendance-detail-api'),
+    path('api/biometric/', BiometricView.as_view(), name='biometric-api'),
 ]

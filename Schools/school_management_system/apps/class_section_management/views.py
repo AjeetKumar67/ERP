@@ -1,43 +1,44 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from .models import Class, Section, Subject
-from django.contrib import messages
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from .models import ClassSection, Section, Subject
+from .serializers import ClassSectionSerializer, SectionSerializer, SubjectSerializer
 
-def class_list(request):
-    classes = Class.objects.all()
-    return render(request, 'class_section_management/class_list.html', {'classes': classes})
+class ClassSectionViewSet(ModelViewSet):
+    queryset = ClassSection.objects.all()
+    serializer_class = ClassSectionSerializer
 
-def section_list(request):
-    sections = Section.objects.all()
-    return render(request, 'class_section_management/section_list.html', {'sections': sections})
+    @action(detail=False, methods=['post'], url_path='create')
+    def create_class(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def create_class(request):
-    if request.method == 'POST':
-        class_name = request.POST.get('class_name')
-        new_class = Class(name=class_name)
-        new_class.save()
-        messages.success(request, 'Class created successfully!')
-        return redirect('class_list')
-    return render(request, 'class_section_management/create_class.html')
 
-def create_section(request):
-    if request.method == 'POST':
-        section_name = request.POST.get('section_name')
-        class_id = request.POST.get('class_id')
-        new_section = Section(name=section_name, class_id=class_id)
-        new_section.save()
-        messages.success(request, 'Section created successfully!')
-        return redirect('section_list')
-    classes = Class.objects.all()
-    return render(request, 'class_section_management/create_section.html', {'classes': classes})
+class SectionViewSet(ModelViewSet):
+    queryset = Section.objects.all()
+    serializer_class = SectionSerializer
 
-def allocate_subject(request):
-    if request.method == 'POST':
-        subject_name = request.POST.get('subject_name')
-        section_id = request.POST.get('section_id')
-        new_subject = Subject(name=subject_name, section_id=section_id)
-        new_subject.save()
-        messages.success(request, 'Subject allocated successfully!')
-        return redirect('section_list')
-    sections = Section.objects.all()
-    return render(request, 'class_section_management/allocate_subject.html', {'sections': sections})
+    @action(detail=False, methods=['post'], url_path='create')
+    def create_section(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubjectViewSet(ModelViewSet):
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+
+    @action(detail=False, methods=['post'], url_path='allocate')
+    def allocate_subject(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,16 +1,14 @@
-# from django.urls import path
-# from .views import StudentPerformanceReportView, FinancialAnalyticsView, AttendanceAnalyticsView
-
-# urlpatterns = [
-#     path('student-performance/', StudentPerformanceReportView.as_view(), name='student-performance-report'),
-#     path('financial/', FinancialAnalyticsView.as_view(), name='financial-analytics'),
-#     path('attendance/', AttendanceAnalyticsView.as_view(), name='attendance-analytics'),
-# ]
 from django.urls import path
-from .views import StudentPerformanceReportView, FinancialAnalyticsView, AttendanceAnalyticsView
+from .views import (
+    PerformanceReportView,
+    FinancialReportView,
+    GeneratePerformanceReportView,
+    GenerateFinancialReportView,
+)
 
 urlpatterns = [
-    path('student-performance/', StudentPerformanceReportView.as_view(), name='student-performance-report'),
-    path('financial/', FinancialAnalyticsView.as_view(), name='financial-analytics'),
-    path('attendance/', AttendanceAnalyticsView.as_view(), name='attendance-analytics'),
+    path('performance-report/', PerformanceReportView.as_view(), name='performance-report'),
+    path('financial-report/', FinancialReportView.as_view(), name='financial-report'),
+    path('generate-performance-report/<int:student_id>/', GeneratePerformanceReportView.as_view(), name='generate-performance-report'),
+    path('generate-financial-report/<int:student_id>/', GenerateFinancialReportView.as_view(), name='generate-financial-report'),
 ]

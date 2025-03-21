@@ -1,68 +1,93 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Supply, Uniform
-from .forms import SupplyForm, UniformForm
+from .serializers import SupplySerializer, UniformSerializer
 
-def supply_list(request):
-    supplies = Supply.objects.all()
-    return render(request, 'inventory_management/supply_list.html', {'supplies': supplies})
+class SupplyListView(APIView):
+    def get(self, request):
+        supplies = Supply.objects.all()
+        serializer = SupplySerializer(supplies, many=True)
+        return Response(serializer.data)
 
-def supply_create(request):
-    if request.method == 'POST':
-        form = SupplyForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('supply_list')
-    else:
-        form = SupplyForm()
-    return render(request, 'inventory_management/supply_form.html', {'form': form})
+    def post(self, request):
+        serializer = SupplySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def supply_update(request, pk):
-    supply = Supply.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = SupplyForm(request.POST, instance=supply)
-        if form.is_valid():
-            form.save()
-            return redirect('supply_list')
-    else:
-        form = SupplyForm(instance=supply)
-    return render(request, 'inventory_management/supply_form.html', {'form': form})
+class SupplyDetailView(APIView):
+    def get_object(self, pk):
+        try:
+            return Supply.objects.get(pk=pk)
+        except Supply.DoesNotExist:
+            return None
 
-def supply_delete(request, pk):
-    supply = Supply.objects.get(pk=pk)
-    if request.method == 'POST':
+    def get(self, request, pk):
+        supply = self.get_object(pk)
+        if not supply:
+            return Response({'error': 'Supply not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SupplySerializer(supply)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        supply = self.get_object(pk)
+        if not supply:
+            return Response({'error': 'Supply not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = SupplySerializer(supply, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        supply = self.get_object(pk)
+        if not supply:
+            return Response({'error': 'Supply not found'}, status=status.HTTP_404_NOT_FOUND)
         supply.delete()
-        return redirect('supply_list')
-    return render(request, 'inventory_management/supply_confirm_delete.html', {'supply': supply})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-def uniform_list(request):
-    uniforms = Uniform.objects.all()
-    return render(request, 'inventory_management/uniform_list.html', {'uniforms': uniforms})
+class UniformListView(APIView):
+    def get(self, request):
+        uniforms = Uniform.objects.all()
+        serializer = UniformSerializer(uniforms, many=True)
+        return Response(serializer.data)
 
-def uniform_create(request):
-    if request.method == 'POST':
-        form = UniformForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('uniform_list')
-    else:
-        form = UniformForm()
-    return render(request, 'inventory_management/uniform_form.html', {'form': form})
+    def post(self, request):
+        serializer = UniformSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def uniform_update(request, pk):
-    uniform = Uniform.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = UniformForm(request.POST, instance=uniform)
-        if form.is_valid():
-            form.save()
-            return redirect('uniform_list')
-    else:
-        form = UniformForm(instance=uniform)
-    return render(request, 'inventory_management/uniform_form.html', {'form': form})
+class UniformDetailView(APIView):
+    def get_object(self, pk):
+        try:
+            return Uniform.objects.get(pk=pk)
+        except Uniform.DoesNotExist:
+            return None
 
-def uniform_delete(request, pk):
-    uniform = Uniform.objects.get(pk=pk)
-    if request.method == 'POST':
+    def get(self, request, pk):
+        uniform = self.get_object(pk)
+        if not uniform:
+            return Response({'error': 'Uniform not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UniformSerializer(uniform)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        uniform = self.get_object(pk)
+        if not uniform:
+            return Response({'error': 'Uniform not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UniformSerializer(uniform, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        uniform = self.get_object(pk)
+        if not uniform:
+            return Response({'error': 'Uniform not found'}, status=status.HTTP_404_NOT_FOUND)
         uniform.delete()
-        return redirect('uniform_list')
-    return render(request, 'inventory_management/uniform_confirm_delete.html', {'uniform': uniform})
+        return Response(status=status.HTTP_204_NO_CONTENT)

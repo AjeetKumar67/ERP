@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import SendEmailView, SendSMSView, PushNotificationView
+from .views import NotificationListView, MessageListView, SendMessageView, NotificationCreateView
 
 urlpatterns = [
-    path('email/', SendEmailView.as_view(), name='send-email'),
-    path('sms/', SendSMSView.as_view(), name='send-sms'),
-    path('push-notification/', PushNotificationView.as_view(), name='push-notification'),
+    path('notifications/', NotificationListView.as_view(), name='notification-list'),
+    path('messages/', MessageListView.as_view(), name='message-list'),
+    path('send-message/', SendMessageView.as_view(), name='send-message'),
+    path('create-notification/', NotificationCreateView.as_view(), name='create-notification'),
 ]

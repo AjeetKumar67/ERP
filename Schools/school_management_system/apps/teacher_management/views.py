@@ -1,75 +1,70 @@
-from django.shortcuts import render, redirect
-from django.views import View
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from .models import Teacher, ClassSchedule, Leave
-from .forms import TeacherForm, ClassScheduleForm, LeaveForm
+from .serializers import TeacherSerializer, ClassScheduleSerializer, LeaveSerializer
 
-class TeacherListView(View):
+class TeacherListView(APIView):
     def get(self, request):
         teachers = Teacher.objects.all()
-        return render(request, 'teacher_management/teacher_list.html', {'teachers': teachers})
+        serializer = TeacherSerializer(teachers, many=True)
+        return Response(serializer.data)
 
-class TeacherCreateView(View):
-    def get(self, request):
-        form = TeacherForm()
-        return render(request, 'teacher_management/teacher_form.html', {'form': form})
-
+class TeacherCreateView(APIView):
     def post(self, request):
-        form = TeacherForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('teacher_list')
-        return render(request, 'teacher_management/teacher_form.html', {'form': form})
+        serializer = TeacherSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class TeacherUpdateView(View):
-    def get(self, request, pk):
-        teacher = Teacher.objects.get(pk=pk)
-        form = TeacherForm(instance=teacher)
-        return render(request, 'teacher_management/teacher_form.html', {'form': form})
+class TeacherUpdateView(APIView):
+    def put(self, request, pk):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+        except Teacher.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = TeacherSerializer(teacher, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request, pk):
-        teacher = Teacher.objects.get(pk=pk)
-        form = TeacherForm(request.POST, instance=teacher)
-        if form.is_valid():
-            form.save()
-            return redirect('teacher_list')
-        return render(request, 'teacher_management/teacher_form.html', {'form': form})
-
-class TeacherDeleteView(View):
-    def get(self, request, pk):
-        teacher = Teacher.objects.get(pk=pk)
+class TeacherDeleteView(APIView):
+    def delete(self, request, pk):
+        try:
+            teacher = Teacher.objects.get(pk=pk)
+        except Teacher.DoesNotExist:
+            return Response({'error': 'Teacher not found'}, status=status.HTTP_404_NOT_FOUND)
+        
         teacher.delete()
-        return redirect('teacher_list')
+        return Response({'message': 'Teacher deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-class ClassScheduleView(View):
+class ClassScheduleView(APIView):
     def get(self, request):
         schedules = ClassSchedule.objects.all()
-        return render(request, 'teacher_management/class_schedule.html', {'schedules': schedules})
+        serializer = ClassScheduleSerializer(schedules, many=True)
+        return Response(serializer.data)
 
-class ClassScheduleCreateView(View):
-    def get(self, request):
-        form = ClassScheduleForm()
-        return render(request, 'teacher_management/class_schedule_form.html', {'form': form})
-
+class ClassScheduleCreateView(APIView):
     def post(self, request):
-        form = ClassScheduleForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('class_schedule')
-        return render(request, 'teacher_management/class_schedule_form.html', {'form': form})
+        serializer = ClassScheduleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class LeaveRequestView(View):
+class LeaveRequestView(APIView):
     def get(self, request):
         leaves = Leave.objects.all()
-        return render(request, 'teacher_management/leave_request.html', {'leaves': leaves})
+        serializer = LeaveSerializer(leaves, many=True)
+        return Response(serializer.data)
 
-class LeaveRequestCreateView(View):
-    def get(self, request):
-        form = LeaveForm()
-        return render(request, 'teacher_management/leave_form.html', {'form': form})
-
+class LeaveRequestCreateView(APIView):
     def post(self, request):
-        form = LeaveForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('leave_request')
-        return render(request, 'teacher_management/leave_form.html', {'form': form})
+        serializer = LeaveSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
